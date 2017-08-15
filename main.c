@@ -20,6 +20,4 @@ int main (int argc, char **argv)
 	printf("ref->i = %d | ref->j = %d | ref->line = %d\n", ref.i, ref.j, ref.line);
 	free(tab);
 	free(tab_h);
-	clean_list(closeset);
-	clean_list(openset);
 }

@@ -60,11 +60,3 @@ void ft_print_list(t_list *list)
 		list = list->next;
 	}
 }
-
-void clean_list(t_list *list)
-{
-	if (list = NULL)
-		return;
-	clean_list(list->next);
-	free(list);
-}
