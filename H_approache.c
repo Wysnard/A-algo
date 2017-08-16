@@ -47,7 +47,7 @@ t_list *ft_drop(t_list **list)
 
 	tmp = *list;
 	if (tmp->prev == NULL && tmp->next == NULL)
-		return (tmp->prev);
+		return (tmp->next);
 	else if (tmp->prev && tmp->next)
 	{
 		tmp->prev->next = tmp->next;
@@ -56,7 +56,10 @@ t_list *ft_drop(t_list **list)
 	else if (tmp->prev == NULL && tmp->next)
 		return (tmp->next);
 	else if (tmp->prev && tmp->next == NULL)
+	{
 		tmp->prev->next = tmp->next;
+		tmp = tmp->prev;
+	}
 	while (tmp->prev)
 	{
 		tmp = tmp->prev;
@@ -80,7 +83,7 @@ t_list *ft_init_start(t_list *list)
 	tmp->i = 0;
 	tmp->j = 0;
 	tmp->G = 0;
-	tmp->F = 0;
+	tmp->F = 1;
 }
 
 int **ft_make_H(t_ref ref, int ct)
@@ -147,47 +150,47 @@ t_list	*ft_new_openset(t_list **openset, t_list **closeset, int **tab_h, char **
 	j = (*closeset)->j;
 	G = (*closeset)->G;
 	tmp = *openset;
-	if (i > 0 && (tab[j][i - 1] == '.' || tab[j][i - 1] == 'x') && ft_check_double(closeset, openset, j, i - 1, G, tab_h))
+	if (i > 0 && (tab[j][i - 1] == ref.vide || tab[j][i - 1] == ref.sqr) && ft_check_double(closeset, openset, j, i - 1, G, tab_h))
 	{
 		tmp = ft_addlink(tmp);
 		tmp->parent = *closeset;
 		tmp->i = i - 1;
 		tmp->j = j;
 		tmp->G = G + 1;
-		tmp->F = (tab[j][i - 1] == '.') ? tmp->G + tab_h[j][i - 1] : 0;
+		tmp->F = (tab[j][i - 1] == ref.vide) ? tmp->G + tab_h[j][i - 1] : 0;
 		//printf("openset->F = %d | G = %d | H = %d\n", tmp->F, tmp->G, tab_h[(*closeset)->j][(*closeset)->i + 1]);
 		//printf("openset->j = %d | i = %d\n", tmp->j, tmp->i);
 	}
-	if (j > 0 && (tab[j - 1][i] == '.' || tab[j - 1][i] == 'x') && ft_check_double(closeset, openset, j - 1, i, G, tab_h))
+	if (j > 0 && (tab[j - 1][i] == ref.vide || tab[j - 1][i] == ref.sqr) && ft_check_double(closeset, openset, j - 1, i, G, tab_h))
 	{
 		tmp = ft_addlink(tmp);
 		tmp->parent = *closeset;
 		tmp->i = i;
 		tmp->j = j - 1;
 		tmp->G = G + 1;
-		tmp->F = (tab[j - 1][i] == '.') ? tmp->G + tab_h[j - 1][i] : 0;
+		tmp->F = (tab[j - 1][i] == ref.vide) ? tmp->G + tab_h[j - 1][i] : 0;
 		//printf("openset->F = %d | G = %d | H = %d\n", tmp->F, tmp->G, tab_h[(*closeset)->j + 1][(*closeset)->i]);
 		//printf("openset->j = %d | i = %d\n", tmp->j, tmp->i);
 	}
-	if (j < ref.j && (tab[j + 1][i] == '.' || tab[j + 1][i] == 'x') && ft_check_double(closeset, openset, j + 1, i, G, tab_h))
+	if (j < ref.j && (tab[j + 1][i] == ref.vide || tab[j + 1][i] == ref.sqr) && ft_check_double(closeset, openset, j + 1, i, G, tab_h))
 	{
 		tmp = ft_addlink(tmp);
 		tmp->parent = *closeset;
 		tmp->i = i;
 		tmp->j = j + 1;
 		tmp->G = G + 1;
-		tmp->F = (tab[j + 1][i] == '.') ? tmp->G + tab_h[j + 1][i] : 0;
+		tmp->F = (tab[j + 1][i] == ref.vide) ? tmp->G + tab_h[j + 1][i] : 0;
 		//printf("openset->F = %d | G = %d | H = %d\n", tmp->F, tmp->G, tab_h[(*closeset)->j + 1][(*closeset)->i]);
 		//printf("openset->j = %d | i = %d\n", tmp->j, tmp->i);
 	}
-	if (i < ref.i && (tab[j][i + 1] == '.' || tab[j][i + 1] == 'x') && ft_check_double(closeset, openset, j, i + 1, G, tab_h))
+	if (i < ref.i && (tab[j][i + 1] == ref.vide || tab[j][i + 1] == ref.sqr) && ft_check_double(closeset, openset, j, i + 1, G, tab_h))
 	{
 		tmp = ft_addlink(tmp);
 		tmp->parent = *closeset;
 		tmp->i = i + 1;
 		tmp->j = j;
 		tmp->G = G + 1;
-		tmp->F = (tab[j][i + 1] == '.') ? tmp->G + tab_h[j][i + 1] : 0;
+		tmp->F = (tab[j][i + 1] == ref.vide) ? tmp->G + tab_h[j][i + 1] : 0;
 		//printf("openset->F = %d | G = %d | H = %d\n", tmp->F, tmp->G, tab_h[(*closeset)->j][(*closeset)->i + 1]);
 		//printf("openset->j = %d | i = %d\n", tmp->j, tmp->i);
 	}
@@ -201,7 +204,7 @@ void ft_here_is_is(t_list **closeset, char **tab, t_ref ref)
 {
 	while((*closeset))
 	{
-		tab[(*closeset)->j][(*closeset)->i] = 'x';
+		tab[(*closeset)->j][(*closeset)->i] = ref.sqr;
 		*closeset = (*closeset)->parent;
 	}
 }
@@ -214,16 +217,28 @@ void ft_the_route(t_list **openset, t_list **closeset, int **tab_h, char **tab, 
 	ct = 0;
 	*openset = ft_init_start(*openset);
 	printf("start = %d\n", (*openset)->F);
-	min = ft_minlist(*openset);
-	*openset = ft_drop(&min);
-	*closeset = ft_addclose(*closeset, min);
+	*closeset = ft_addclose(*closeset, *openset);
+	*openset = (*openset)->next;
+	tab[(*closeset)->j][(*closeset)->i] = '|';
 	*openset = ft_new_openset(openset, closeset, tab_h, tab, ref);
-	while (((*closeset)->j != ref.j || (*closeset)->i != ref.i) && *openset)
+	ft_print_list(*openset);
+	while (*openset)
 	{
-		min = ft_minlist(*openset);
-		*openset = ft_drop(&min);
+		*openset = ft_sort_list(*openset);
+		min = *openset;
+		*openset = (*openset)->next;
 		*closeset = ft_addclose(*closeset, min);
+		tab[(*closeset)->j][(*closeset)->i] = '|';
+		//printf("close j = %d | close i = %d\n", (*closeset)->j, (*closeset)->i);
 		*openset = ft_new_openset(openset, closeset, tab_h, tab, ref);
+		if (((*closeset)->j == ref.j && (*closeset)->i == ref.i) || *openset == NULL)
+		break ;
+	}
+	if (*openset == NULL)
+	{
+		printf("No Solution!\n");
+		return ;
 	}
 	ft_here_is_is(closeset, tab, ref);
+	//ft_print_list(*openset);
 }

@@ -46,5 +46,6 @@ t_list *ft_drop(t_list **list);
 int	ft_check_double(t_list	**closeset, t_list **openset, int j, int i, int G, int **tab_h);
 void ft_init_map(int fd, t_ref *ref);
 void clean_list(t_list *list);
+t_list *ft_sort_list(t_list * pList);
 
 #endif
